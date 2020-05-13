@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>SF Slow Streets</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<link rel='icon' href='favicon.ico?' type='image/x-icon'/ >
+<script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+
+<style>
+	body {
+    margin: 0;
+    padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+	#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+		background-color: #03070d;
+  }
+  #info {
+    position: fixed;
+    width: 80%;
+    max-width: 400px;
+    height: 80%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px;
+    color: #000000;
+    background-color: #d3d3d4;
+    z-index: 1000;
+    border-radius: 20px;
+  }
+    #info-legendBox {
+    position: fixed;
+    width: 80%;
+    max-width: 400px;
+    height: 80%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px;
+    color: #000000;
+    background-color: #d3d3d4;
+    z-index: 1000;
+    border-radius: 20px;
+  }
+  #info-content {
+    width: 100%;
+    height: 80%;
+    overflow: auto;
+    font-size: 1em;
+  }
+  #info-content h1 {
+    margin-top: 0;
+  }
+  #info-content h3 {
+    margin-bottom: 0;
+  }
+  #info-content p {
+    width: 100%;
+    overflow: auto;
+  }
+  
+
+  #info-legend {
+    width: 100%;
+    height: 80%;
+    overflow: auto;
+    font-size: 1em;
+  }
+  #info-legend h1 {
+    margin-top: 0;
+  }
+  #info-legend h3 {
+    margin-bottom: 0;
+  }
+  #info-legend p {
+    width: 100%;
+    overflow: auto;
+  }
+  #info-button {
+    height: 50px;
+    padding: 1em;
+    text-align: center;
+  }
+  #info-button button {
+    padding: 0.5em;
+    color: #ffffff;
+    font-size: 1.25em;
+    font-weight: bold;
+    background-color: #c41230;
+    outline: 0;
+    border: 0;
+    border-radius: 10px;
+  }
+  #info-button button:hover {
+    background-color: #153054;
+    transition: 0.1s ease-in-out;
+  }
+
+  #open-info {
+    position: fixed;
+    background-color: #c41230;
+    margin-left: 10px;
+    margin-top: 10px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    outline: 0;
+    border: 0;
+    border-radius: 20px;
+    z-index: 2000;
+  }
+  #open-info h2 {
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    color: #ffffff;
+    margin-top: 8px;
+  }
+  #open-info:hover {
+    background-color: #153054;
+    transition: 0.1s ease-in-out;
+  }
+  
+    #open-legend {
+    position: fixed;
+    background-color: #c41230;
+    margin-left: 60px;
+    margin-top: 10px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    outline: 0;
+    border: 0;
+    border-radius: 20px;
+    z-index: 2000;
+  }
+  #open-legend h2 {
+    font-family: "Times New Roman", Times, serif;
+    font-weight: bold;
+    color: #ffffff;
+    margin-top: 8px;
+  }
+  #open-legend:hover {
+    background-color: #153054;
+    transition: 0.1s ease-in-out;
+  }
+	a:link {
+		color: #c41230;
+		text-decoration: none;
+	}
+	a:visited {
+		color: #c41230;
+		text-decoration: none;
+	}
+	a:hover {
+		color: #153054;
+	  text-decoration: underline;
+	}
+	a:active {
+		color: #c41230;
+	  text-decoration: underline;
+	}
+	.mapboxgl-ctrl-group {
+    background: #c41230;
+	}
+	.mapboxgl-ctrl-group button+button {
+    border-top: 1px solid #000;
+	}
+	.mapboxgl-ctrl button:not(:disabled):hover {
+    background-color: #153054;
+		transition: 0.1s ease-in-out;
+	}
+	.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='29' height='29' viewBox='0 0 29 29' xmlns='http://www.w3.org/2000/svg' fill='white'%3E%3Cpath d='M14.5 8.5c-.75 0-1.5.75-1.5 1.5v3h-3c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h3v3c0 .75.75 1.5 1.5 1.5S16 19.75 16 19v-3h3c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-3v-3c0-.75-.75-1.5-1.5-1.5z'/%3E%3C/svg%3E");
+	}
+	.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='29' height='29' viewBox='0 0 29 29' xmlns='http://www.w3.org/2000/svg' fill='white'%3E%3Cpath d='M10 13c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h9c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-9z'/%3E%3C/svg%3E");
+	}
+	.mapboxgl-ctrl button.mapboxgl-ctrl-compass .mapboxgl-ctrl-icon {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='29' height='29' viewBox='0 0 29 29' xmlns='http://www.w3.org/2000/svg' fill='white'%3E%3Cpath d='M10.5 14l4-8 4 8h-8z'/%3E%3Cpath d='M10.5 16l4 8 4-8h-8z' fill='black'/%3E%3C/svg%3E");
+	}
+  .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+    border-top-color: #03070d;
+  }
+  .mapboxgl-popup-content {
+    color: white;
+    font-weight: bold;
+    background-color: #03070d;
+    border: 1px solid white;
+    border-radius: 10px;
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, .8);
+  }
+  .mapboxgl-popup-content .name {
+    margin: 0;
+    margin-bottom: 0.5em;
+  }
+  .mapboxgl-popup-content .width {
+    margin: 0;
+    margin-bottom: 0.2em;
+    font-size: 2.0em;
+  }
+  .mapboxgl-popup-content .message {
+    margin: 0;
+    margin-bottom: 0.2em;
+    font-size: 1.5em;
+  }
+  #menu {
+background: #fff;
+position: absolute;
+z-index: 2000;
+top: 55px;
+right: 50px;
+width: 120px;
+border: 0;
+font-family: 'Open Sans', sans-serif;
+}
+ 
+#menu a {
+font-size: 13px;
+color: #404040;
+display: block;
+margin: 0;
+padding: 0;
+padding: 10px;
+text-decoration: none;
+border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+text-align: center;
+}
+ 
+#menu a:last-child {
+border: none;
+}
+ 
+#menu a:hover {
+background-color: #f8f8f8;
+color: #404040;
+}
+ 
+#menu a.active {
+background-color: #c41230;
+color: #ffffff;
+}
+ 
+#menu a.active:hover {
+background: #153054;
+}
+
+.legend {
+
+top: 140px;
+
+font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+padding: 10px;
+position: absolute;
+z-index: 1;
+}
+ 
+.legend h4 {
+margin: 0 0 10px;
+}
+ 
+.legend div span {
+
+display: inline-block;
+height: 5px;
+margin-right: 5px;
+width: 10px;
+}
+
+.legend2 {
+top: 380px;
+font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+padding: 10px;
+position: absolute;
+
+z-index: 1;
+}
+ 
+.legend2 h4 {
+margin: 0 0 10px;
+}
+ 
+.legend2 div span {
+border-radius: 50%;
+display: inline-block;
+height: 5px;
+margin-right: 5px;
+width: 10px;
+}
+
+
+</style>
+</head>
+<body>
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.min.js"></script>
+<link
+rel="stylesheet"
+href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.5.1/mapbox-gl-geocoder.css"
+type="text/css"
+/>
+<nav id="menu"></nav>
+  <div id="info" style='display:block'>
+    <div id="info-content">
+      <h3>Welcome to</h3>
+      <h1>San Francisco Slow Streets</h1>
+	  
+	  <p>San Francisco has launched the <a href="https://www.sfmta.com/projects/slow-streets-program">Slow Streets</a> program, closing certain streets to through traffic and opening them to walking, wheelchair rolling, skateboarding, and rollerblading.</p>
+      <p>This map highlights streets that where this program has been implemented and additional planned streets.</p>
+	  <p>Inspired by <a href="https://www.sidewalkwidths.nyc/">sidewalkwidths.nyc</a> the map also highlights the widths of sidewalks throughout the city. Placing sidewalk widths next to streets that meet the Shared Street criteria may help further prioritize areas of the city most in need of additional space for social distancing.</p>
+	  
+	  
+	  
+	  
+	  <p><small><b>DISCLAIMER</b><br>
+	  <p>Sidewalk Widths were determined from the San Francisco's <a href="https://data.sfgov.org/Transportation/Sidewalk-Widths/4g86-grxu">Sidewalk dataset</a> Actual sidewalk and road conditions, as well as sidewalk obstructions are not accounted for in the dataset. If you know of streets that should be added to the Slow Streets list, or areas where sidewalks need improvement please contact <a href="mailto:slowstreets@sfmta.com">SlowStreets@sfmta.com</a> or take SFMTA's <a href="https://www.surveygizmo.com/s3/5563850/Slow-Streets-Survey">survey</a>.</p>
+
+</small></p>
+    </div>
+    <div id="info-button" onclick="closeInfo()">
+      <button>Explore the Map</button>
+    </div>
+  </div>
+  
+    <div id="info-legendBox" style='display:none'>
+    <div id="info-content">
+     
+      <h3>SFMTA Slow Streets</h3>
+	  <div class="legend">
+<div><span style="background-color: #ffffff"></span>Implemented</div>
+<div><span style="background-color: #1D4AF4"></span>Planned</div>
+<div><span style="background-color: #F4319E"></span>Temporarily Closed to Vehicles</div></div>
+	  <div class="legend2">
+	  <div><span style="background-color: #03a1fc"></span>Very Easy</div>
+<div><span style="background-color: #03fc7b"></span>Easy</div>
+<div><span style="background-color: #34e059"></span>Somewhat Easy</div>
+<div><span style="background-color: #a7ed2d"></span>Somewhat Difficult</div>
+<div><span style="background-color: #bab849"></span>Difficult</div>
+<div><span style="background-color: #de873c"></span>Very Difficult</div>
+<div><span style="background-color: #d7191c"></span>Impossible</div>
+</div>
+
+	  
+	  <p>Slow Streets were determined by SFMTA using this <a href="https://www.sfmta.com/projects/slow-streets-program">criteria</a>.</p>
+	  <br>
+	  <br>
+	  <br>
+	  <br>
+	  <br>
+	  <br>
+	  <br>
+
+	  <h3>Sidewalk Width</h3>
+	  <p>Sidewalks are categorized by ease of social distancing, based off their recorded width from Charlotte's <a href="https://data.sfgov.org/Transportation/Sidewalk-Widths/4g86-grxu">sidewalk</a> dataset.
+	  
+	  
+    </div>
+    <div id="info-button" onclick="closeLegend()">
+      <button>Return to the Map</button>
+    </div>
+	</div>
+
+
+
+  <button id="open-info" onclick="openInfo()">
+    <h2>i</h2>
+  </button>
+  <button id="open-legend" onclick="openLegend()">
+    <h2>l</h2>
+  </button>
+  
+
+  <div id="map"></div>
+
+  <script>
+
+  function closeInfo() {
+    var x = document.getElementById("info");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
+
+  function openInfo() {
+    var x = document.getElementById("info");
+    if (x.style.display === "block") {
+      x.style.display = "none";
+    } else {
+      x.style.display = "block";
+    }
+  }
+  
+    function closeLegend() {
+    var x = document.getElementById("info-legendBox");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
+
+  function openLegend() {
+    var x = document.getElementById("info-legendBox");
+    if (x.style.display === "block") {
+      x.style.display = "none";
+    } else {
+      x.style.display = "block";
+    }
+  }
+
+	mapboxgl.accessToken = 'pk.eyJ1IjoiaG9sZGVubXQxMSIsImEiOiJYMXNtNE5RIn0.Gg7JM4pb0iiGUfEZrxnEYw';
+  var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/holdenmt11/ck9d297nt13t21ipbd0epqs8s',
+    center: [-122.4194, 37.7749],
+    zoom: 14,
+  	maxZoom: 22,
+  	minZoom: 6,
+		maxBounds: [
+			[-122.563,37.6864], // Southwest coordinates
+			[-122.3405,37.834] // Northeast coordinates 
+		],
+		hash: true
+  });
+	map.addControl(new MapboxGeocoder({
+		accessToken: mapboxgl.accessToken,
+		mapboxgl: mapboxgl}));
+	map.addControl(new mapboxgl.NavigationControl());
+
+
+  map.on('load', function() {
+
+		map.addSource('sidewalks', {
+			 type: 'vector',
+			 url: 'mapbox://holdenmt11.aaoe3uqc'
+		});
+
+    map.addLayer({
+      'id': 'sidewalks',
+      'type': 'line',
+      'source': 'sidewalks',
+			'source-layer': 'SidewalkWidthSF-1h81vr',
+      'layout': {
+        'line-cap': 'round',
+      },
+      'paint': {
+        'line-width': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14, 1.5,
+          19, 10,
+        ],
+        'line-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'sidewalk_f'],
+          0, '#d7191c',
+          6, '#d7191c',
+          12, '#bab849',
+          18, '#03fc7b',
+          24, '#03a1fc'
+        ],
+        'line-opacity': 1,
+      },
+    },
+    'road-label'
+    );
+	
+			map.addSource('roads', {
+			 type: 'vector',
+			 url: 'mapbox://holdenmt11.49cev1ru'
+		});
+	
+    map.addLayer({
+      'id': 'roads',
+      'type': 'line',
+      'source': 'roads',
+			'source-layer': 'SlowStreets-3empye',
+      'layout': {
+        'line-cap': 'round',
+      },
+		'paint':{
+		'line-width':[
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14, 2,
+          19, 12,
+        ],
+        'line-color': [
+			'match',
+          ['get', 'SlowStreet'],
+		  'Implemented', '#ffffff',
+		  'Planned', '#1D4AF4',
+		  'Temporarily Closed to Vehicles', '#F4319E',
+		  '#F4319E'
+        ],
+        'line-opacity': 1,
+      },
+    },
+    'road-label'
+    );
+
+    map.addLayer(
+      {
+        'id': '3d-buildings',
+        'source': 'composite',
+        'source-layer': 'building',
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': 15,
+        'paint': {
+        'fill-extrusion-color': '#141c26',
+        'fill-extrusion-height': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          15, 0,
+          15.05, ['get', 'height']
+        ],
+        'fill-extrusion-base': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          15, 0,
+          15.05, ['get', 'min_height']
+        ],
+        'fill-extrusion-opacity': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          15, 0,
+          16, 0.95
+        ]
+      }
+    },
+    'road-label'
+    );
+
+var popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    function addPopup(e) {
+
+      map.getCanvas().style.cursor = 'pointer';
+
+      var lineWidth = e.features[0].properties.sidewalk_f
+      var lineColor = e.features[0].layer.paint['line-color']
+      var coordinates = e.lngLat;
+
+      if (lineWidth < 6) {
+        var message = 'Social distancing will be impossible on this path.'
+        var lineColor = '#d7191c'
+      } else if (lineWidth >= 6 && lineWidth < 10) {
+        var message = 'Social distancing will be very difficult on this path.'
+        var lineColor = '#de873c'
+			} else if (lineWidth >= 10 && lineWidth < 12) {
+        var message = 'Social distancing will be difficult on this path.'
+        var lineColor = '#bab849'
+      } else if (lineWidth >= 12 && lineWidth < 14) {
+        var message = 'Social distancing may be somewhat difficult on this path.'
+        var lineColor = '#a7ed2d'
+			} else if (lineWidth >= 14 && lineWidth < 16) {
+				var message = 'Social distancing may be somewhat easy on this path.'
+				var lineColor = '#65c334'
+			} else if (lineWidth >= 16 && lineWidth < 18) {
+				var message = 'Social distancing may be somewhat easy on this path.'
+				var lineColor = '#34e059'
+			} else if (lineWidth >= 18 && lineWidth < 20) {
+				var message = 'Social distancing should be easy on this path.'
+				var lineColor = '#03fc72'
+			} else if (lineWidth >= 22 && lineWidth < 24) {
+				var message = 'Social distancing should be very easy on this path.'
+				var lineColor = '#03fcda'
+      } else {
+        var message = 'Social distancing should be very easy on this path.'
+        var lineColor = '#03a1fc'
+      }
+
+      var description = (
+        '<div class="name">Sidewalk Width:</div>' +
+        '<div class="width">' + Math.round(lineWidth * 10) / 10) + ' ft</div>' +
+        '<div class="message">' + message + '</div>'
+
+      popup.setLngLat(coordinates)
+      popup.setHTML(description)
+      popup.addTo(map)
+
+      popup._content.style.color = lineColor
+      popup._content.style.borderColor = lineColor
+
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-bottom')) {
+				popup._tip.style.borderTopColor = lineColor
+			}
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-top')) {
+	      popup._tip.style.borderBottomColor = lineColor
+			}
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-right')) {
+				popup._tip.style.borderLeftColor = lineColor
+			}
+			if (popup._tip.offsetParent.className.includes('mapboxgl-popup-anchor-left')) {
+				popup._tip.style.borderRightColor = lineColor
+			}
+
+      popup.addTo(map)
+    }
+
+    map.on('touchstart', 'sidewalks', function(e) {
+      addPopup(e);
+    })
+
+    map.on('mousemove', 'sidewalks', function(e) {
+      addPopup(e);
+    });
+
+    map.on('mouseleave', 'sidewalks', function() {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
+	  });
+	  
+	  var popups = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+	
+	function addPopup1(e) {
+
+      map.getCanvas().style.cursor = 'pointer';
+
+	  var lineReason=e.features[0].properties.SlowStreet
+	  var lineName =e.features[0].properties.streetname
+      var lineColor1 = e.features[0].layer.paint['line-color']
+      var coordinates1 = e.lngLat;
+
+	   
+      if (lineReason == 'Implemented') {
+        var message1 = 'Implemented'
+        var lineColor1 = '#F4431D'
+      } else if (lineReason == 'Planned') {
+        var message1 = 'Planned'
+        var lineColor1 = '#1D4AF4'
+			} else if (lineReason == 'Temporarily Closed to Vehicles') {
+        var message1 = 'Temporarily Closed to Vehicles'
+        var lineColor1 = '#F4319E'
+      } else {
+        var message1 = 'Temporarily Closed to Vehicles'
+        var lineColor1 = '#F4319E'
+      }
+
+
+      var description1 = (
+        '<div class="name">SFMTA Slow Streets</div>' +
+		'<div class="name">'+ lineName +'</div>' +
+        '<div class="width">' + message1 )+ '</div>'
+
+      popups.setLngLat(coordinates1)
+      popups.setHTML(description1)
+      popups.addTo(map)
+	  
+	  
+
+      popups._content.style.color = lineColor1
+      popups._content.style.borderColor = lineColor1
+
+			if (popups._tip.offsetParent.className.includes('mapboxgl-popup-anchor-bottom')) {
+				popups._tip.style.borderTopColor = lineColor1
+			}
+			if (popups._tip.offsetParent.className.includes('mapboxgl-popup-anchor-top')) {
+	      popups._tip.style.borderBottomColor = lineColor1
+			}
+			if (popups._tip.offsetParent.className.includes('mapboxgl-popup-anchor-right')) {
+				popups._tip.style.borderLeftColor = lineColor1
+			}
+			if (popups._tip.offsetParent.className.includes('mapboxgl-popup-anchor-left')) {
+				popups._tip.style.borderRightColor = lineColor1
+			}
+
+      popups.addTo(map)
+    }
+
+    map.on('touchstart', 'roads', function(e) {
+      addPopup1(e);
+    })
+
+    map.on('mousemove', 'roads', function(e) {
+      addPopup1(e);
+    });
+
+    map.on('mouseleave', 'roads', function() {
+      map.getCanvas().style.cursor = '';
+      popups.remove();
+    });
+	    map.on('mouseleave', 'sidewalks', function() {
+      map.getCanvas().style.cursor = '';
+      popup.remove();
+	  });
+
+	  
+	  
+  
+	  
+
+
+  });
+  
+  
+var toggleableLayerIds = ['roads', 'sidewalks'];
+ 
+// set up the corresponding toggle button for each layer
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+var id = toggleableLayerIds[i];
+ 
+var link = document.createElement('a');
+link.href = '#';
+link.className = 'active';
+link.textContent = id;
+ 
+link.onclick = function(e) {
+var clickedLayer = this.textContent;
+e.preventDefault();
+e.stopPropagation();
+ 
+var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+ 
+// toggle layer visibility by changing the layout object's visibility property
+if (visibility === 'visible') {
+map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+this.className = '';
+} else {
+this.className = 'active';
+map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+}
+};
+ 
+var layers = document.getElementById('menu');
+layers.appendChild(link);
+}
+  </script>
+
+</body>
+</html>
