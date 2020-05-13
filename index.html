@@ -558,10 +558,13 @@ var popup = new mapboxgl.Popup({
       var lineColor = e.features[0].layer.paint['line-color']
       var coordinates = e.lngLat;
 
-      if (lineWidth < 6) {
-        var message = 'Social distancing will be impossible on this path.'
+      if (lineWidth == 0) {
+        var message = 'Sidewalk width is not recorded by SF'
         var lineColor = '#d7191c'
-      } else if (lineWidth >= 6 && lineWidth < 10) {
+      } else if (lineWidth > 0 && lineWidth < 6) {
+        var message = 'Social distancing will be very difficult on this path.'
+        var lineColor = '#d7191c'
+			}else if (lineWidth >= 6 && lineWidth < 10) {
         var message = 'Social distancing will be very difficult on this path.'
         var lineColor = '#de873c'
 			} else if (lineWidth >= 10 && lineWidth < 12) {
