@@ -9,7 +9,7 @@ Inspired by [Sidewalk Widths NYC](https://github.com/meliharvey/sidewalkwidths-n
  [San Francisco's sidewalk data](https://data.sfgov.org/Transportation/Sidewalk-Widths/4g86-grxu) and [Street data](https://data.sfgov.org/Geographic-Locations-and-Boundaries/Streets-Active-and-Retired/3psu-pn9h) were used to create the map.
 
 ## Link
-[holdenmt11.github.io/SF-Slow-Streets](https://holdenmt11.github.io/SF-Slow-Streets)
+[holdenmt11.github.io/SF-Slow-Streets](https://holdenmt11.github.io/SF-Slow-Streets/)
 
 
 
